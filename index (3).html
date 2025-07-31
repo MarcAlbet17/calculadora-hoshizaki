@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Calculadora Hoshizaki</title>
+<style>
+  /* Base styling inspired by Hoshizaki Europe branding */
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    background-color: #f8f8f8; /* fondo gris claro similar al sitio */
+    color: #333333;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: #ffffff; /* fondo claro para seguir la cabecera del sitio */
+    color: #004C70; /* tono azul oscuro de la marca */
+    padding: 20px 10px;
+    border-bottom: 1px solid #e5e5e5;
+    margin-bottom: 20px;
+  }
+  header img {
+    max-width: 200px;
+    height: auto;
+    margin-bottom: 10px;
+  }
+  h1 {
+    margin: 0;
+    font-size: 1.6em;
+    font-weight: bold;
+  }
+  p {
+    margin: 0;
+    font-size: 1em;
+  }
+  label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  input, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    box-sizing: border-box;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+  }
+  button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background-color: #004C70; /* tono principal de la marca */
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  button:hover {
+    background-color: #003555;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 0.9em;
+  }
+  th, td {
+    border: 1px solid #dddddd;
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background-color: #F2F8FC; /* light blue background for table header */
+    font-weight: bold;
+  }
+  small {
+    color: #555555;
+  }
+  .result {
+    margin-top: 20px;
+  }
+  /* group each pair of label and field on its own line */
+  .field {
+    display: block;
+    margin-bottom: 15px;
+  }
+  /* Diseño de tarjetas para los resultados */
+  .card {
+    display: flex;
+    align-items: flex-start;
+    background-color: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  .card-image {
+    flex: 0 0 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: #f0f0f0;
+  }
+  .card-image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .card-info h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 1.1em;
+    color: #004C70;
+  }
+  .card-info p {
+    margin: 4px 0;
+    font-size: 0.9em;
+  }
+</style>
+</head>
+<body>
+<header>
+  <img src="logo.png" alt="Logo Hoshizaki" />
+  <h1>Pon un pingüino en tu local</h1>
+  <p>Encuentra el fabricador de hielo que necesitas</p>
+</header>
+<!-- Formulario de entrada -->
+<div id="formulario">
+  <div class="field">
+    <label for="consumo">Consumo diario de hielo (kg)</label>
+    <input type="number" id="consumo" min="0" step="0.1" />
+  </div>
+  <div class="field">
+    <label for="tipoHielo">Tipo de hielo</label>
+    <select id="tipoHielo"></select>
+  </div>
+  <div class="field">
+    <label for="tamanoHielo">Tamaño del cubito / variedad</label>
+    <select id="tamanoHielo"></select>
+  </div>
+  <div class="field">
+    <label for="precio">Precio por kg de hielo comprado en bolsa (opcional)</label>
+    <input type="number" id="precio" min="0" step="0.01" />
+  </div>
+  <div class="field">
+    <button id="calcular">Calcular</button>
+  </div>
+</div>
+<div id="resultado" class="result"></div>
+<script>
+const data = [{"Nombre": "FM-750AKE-R452-SB", "PVP": 15695.0, "Produccion": 750.0, "Ancho": 88.0, "Profundo": 82.0, "Alto": 96.0, "Peso": 131.14, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pilé"}, {"Nombre": "FM-750AKE-R452-N-SB", "PVP": 15695.0, "Produccion": 590.0, "Ancho": 88.0, "Profundo": 82.0, "Alto": 96.0, "Peso": 131.14, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "FM-1000AKE-R452-SB", "PVP": 18815.0, "Produccion": 1030.0, "Ancho": 88.0, "Profundo": 82.0, "Alto": 96.0, "Peso": 143.64, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pilé"}, {"Nombre": "FM-1000AKE-R452-N-SB", "PVP": 18815.0, "Produccion": 860.0, "Ancho": 88.0, "Profundo": 82.0, "Alto": 96.0, "Peso": 143.64, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "FM-1200ALKE-R452-N-SB", "PVP": 17038.0, "Produccion": 1060.0, "Ancho": 88.0, "Profundo": 82.0, "Alto": 86.0, "Peso": 96.64, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Condensador remoto", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "FM-1200ALKE-R452-SB", "PVP": 17038.0, "Produccion": 1200.0, "Ancho": 88.0, "Profundo": 82.0, "Alto": 86.0, "Peso": 96.64, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Condensador remoto", "TipoHielo": "Triturado", "TamanoCubito": "Pilé"}, {"Nombre": "FM-1800ALKE-R452-SB", "PVP": 27568.0, "Produccion": 1800.0, "Ancho": 119.0, "Profundo": 81.0, "Alto": 96.0, "Peso": 136.45, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Condensador remoto", "TipoHielo": "Triturado", "TamanoCubito": "Pilé"}, {"Nombre": "FM-1800ALKE-R452-N-SB", "PVP": 27568.0, "Produccion": 1590.0, "Ancho": 119.0, "Profundo": 81.0, "Alto": 96.0, "Peso": 136.45, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Condensador remoto", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "CM-140KE", "PVP": 7190.0, "Produccion": 140.0, "Ancho": 74.0, "Profundo": 71.0, "Alto": 90.0, "Peso": 67.18, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "FM-600AKE-R452-SB", "PVP": 11615.0, "Produccion": 600.0, "Ancho": 82.0, "Profundo": 67.0, "Alto": 96.0, "Peso": 107.5, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pilé"}, {"Nombre": "FM-600AKE-R452-N-SB", "PVP": 11615.0, "Produccion": 530.0, "Ancho": 82.0, "Profundo": 67.0, "Alto": 96.0, "Peso": 108.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "FM-480AKE-HC-SB", "PVP": 10720.0, "Produccion": 450.0, "Ancho": 82.0, "Profundo": 66.0, "Alto": 96.0, "Peso": 90.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pilé"}, {"Nombre": "FM-480AKE-HCN-SB", "PVP": 10720.0, "Produccion": 380.0, "Ancho": 82.0, "Profundo": 66.0, "Alto": 96.0, "Peso": 90.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "FM-300AKE-HC-SB", "PVP": 8225.0, "Produccion": 300.0, "Ancho": 82.0, "Profundo": 66.0, "Alto": 95.0, "Peso": 79.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pilé"}, {"Nombre": "FM-300AKE-HCN-SB", "PVP": 8225.0, "Produccion": 250.0, "Ancho": 82.0, "Profundo": 66.0, "Alto": 95.0, "Peso": 79.5, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "FM-80KE-HC", "PVP": 5670.0, "Produccion": 85.0, "Ancho": 75.0, "Profundo": 71.0, "Alto": 90.0, "Peso": 61.68, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pilé"}, {"Nombre": "FM-120KE-HC", "PVP": 6055.0, "Produccion": 125.0, "Ancho": 75.0, "Profundo": 71.0, "Alto": 90.0, "Peso": 61.68, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pilé"}, {"Nombre": "FM-80KE-HCN", "PVP": 5670.0, "Produccion": 75.0, "Ancho": 75.0, "Profundo": 71.0, "Alto": 90.0, "Peso": 62.18, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "FM-120KE-HCN", "PVP": 6055.0, "Produccion": 110.0, "Ancho": 75.0, "Profundo": 71.0, "Alto": 89.0, "Peso": 62.68, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "FM-120KE-50-HC", "PVP": 6440.0, "Produccion": 125.0, "Ancho": 75.0, "Profundo": 71.0, "Alto": 89.0, "Peso": 74.16, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pilé"}, {"Nombre": "FM-120KE-50-HCN", "PVP": 6440.0, "Produccion": 110.0, "Ancho": 75.0, "Profundo": 71.0, "Alto": 89.0, "Peso": 75.16, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "FM-150AKE-HC-SB", "PVP": 5310.0, "Produccion": 150.0, "Ancho": 66.0, "Profundo": 82.0, "Alto": 96.0, "Peso": 58.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pilé"}, {"Nombre": "FM-150AKE-HCN-SB", "PVP": 5310.0, "Produccion": 140.0, "Ancho": 66.0, "Profundo": 82.0, "Alto": 96.0, "Peso": 58.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "FM-60KE-HC", "PVP": 5380.0, "Produccion": 65.0, "Ancho": 60.0, "Profundo": 68.0, "Alto": 87.0, "Peso": 49.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pilé"}, {"Nombre": "CM-50KE-HC", "PVP": 5380.0, "Produccion": 55.0, "Ancho": 59.5, "Profundo": 68.0, "Alto": 87.5, "Peso": 49.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "B-140SA", "PVP": 2165.0, "Produccion": 140.0, "Ancho": 67.0, "Profundo": 91.0, "Alto": 120.0, "Peso": 39.48, "TipoProducto": "Depósito de hielo", "TipoChasis": "", "Refrigeracion": "", "TipoHielo": "", "TamanoCubito": ""}, {"Nombre": "B-210SA", "PVP": 2625.0, "Produccion": 210.0, "Ancho": 86.0, "Profundo": 91.0, "Alto": 120.0, "Peso": 50.98, "TipoProducto": "Depósito de hielo", "TipoChasis": "", "Refrigeracion": "", "TipoHielo": "", "TamanoCubito": ""}, {"Nombre": "B-340SA", "PVP": 3845.0, "Produccion": 340.0, "Ancho": 91.0, "Profundo": 132.0, "Alto": 120.0, "Peso": 72.48, "TipoProducto": "Depósito de hielo", "TipoChasis": "", "Refrigeracion": "", "TipoHielo": "", "TamanoCubito": ""}, {"Nombre": "DIM-40DE-HC", "PVP": 6535.0, "Produccion": 43.0, "Ancho": 45.0, "Profundo": 71.0, "Alto": 170.0, "Peso": 58.84, "TipoProducto": "Dispensador de hielo", "TipoChasis": "", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "DCM-60KE-HC", "PVP": 6890.0, "Produccion": 60.0, "Ancho": 66.0, "Profundo": 44.0, "Alto": 103.0, "Peso": 48.54, "TipoProducto": "Dispensador de hielo", "TipoChasis": "", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "DCM-120KE-HC", "PVP": 7075.0, "Produccion": 120.0, "Ancho": 66.0, "Profundo": 44.0, "Alto": 103.0, "Peso": 54.32, "TipoProducto": "Dispensador de hielo", "TipoChasis": "", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "DCM-60KE-P-HC", "PVP": 6890.0, "Produccion": 60.0, "Ancho": 66.0, "Profundo": 44.0, "Alto": 103.0, "Peso": 48.54, "TipoProducto": "Dispensador de hielo", "TipoChasis": "", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "IM-65NE-HC-C", "PVP": 4520.0, "Produccion": 56.0, "Ancho": 74.0, "Profundo": 57.0, "Alto": 102.0, "Peso": 49.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cilindrico", "TamanoCubito": "42"}, {"Nombre": "IM-65NE-HC-Q", "PVP": 7450.0, "Produccion": 28.0, "Ancho": 74.0, "Profundo": 57.0, "Alto": 102.0, "Peso": 66.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Esférico", "TamanoCubito": "45"}, {"Nombre": "IM-21CPE", "PVP": 2265.0, "Produccion": 30.0, "Ancho": 50.5, "Profundo": 57.5, "Alto": 86.2, "Peso": 36.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-30CPE", "PVP": 2680.0, "Produccion": 34.0, "Ancho": 50.5, "Profundo": 57.5, "Alto": 86.2, "Peso": 36.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-30CPE-25", "PVP": 2845.0, "Produccion": 27.0, "Ancho": 50.5, "Profundo": 57.5, "Alto": 86.2, "Peso": 36.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "13"}, {"Nombre": "IM-45PE", "PVP": 3505.0, "Produccion": 47.0, "Ancho": 63.5, "Profundo": 52.0, "Alto": 100.7, "Peso": 44.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-45PE-25", "PVP": 3670.0, "Produccion": 43.0, "Ancho": 63.5, "Profundo": 52.0, "Alto": 100.7, "Peso": 44.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "13"}, {"Nombre": "IM-45CPE", "PVP": 3595.0, "Produccion": 47.0, "Ancho": 73.5, "Profundo": 57.0, "Alto": 86.4, "Peso": 44.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-45CPE-25", "PVP": 3760.0, "Produccion": 42.0, "Ancho": 73.5, "Profundo": 57.0, "Alto": 86.4, "Peso": 44.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "13"}, {"Nombre": "IM-65PE", "PVP": 4250.0, "Produccion": 58.0, "Ancho": 73.5, "Profundo": 57.0, "Alto": 101.2, "Peso": 48.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-65PE-25", "PVP": 4420.0, "Produccion": 56.0, "Ancho": 73.5, "Profundo": 57.0, "Alto": 101.2, "Peso": 48.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "13"}, {"Nombre": "IM-100PE", "PVP": 5590.0, "Produccion": 104.0, "Ancho": 80.5, "Profundo": 58.0, "Alto": 137.5, "Peso": 70.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-130PE", "PVP": 6600.0, "Produccion": 116.0, "Ancho": 80.5, "Profundo": 58.0, "Alto": 137.5, "Peso": 71.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-130PE-23", "PVP": 6805.0, "Produccion": 110.0, "Ancho": 80.5, "Profundo": 58.0, "Alto": 137.5, "Peso": 71.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-130PE-32", "PVP": 6945.0, "Produccion": 108.0, "Ancho": 80.5, "Profundo": 58.0, "Alto": 137.5, "Peso": 71.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "32"}, {"Nombre": "IM-130CPE", "PVP": 6160.0, "Produccion": 108.0, "Ancho": 111.0, "Profundo": 70.0, "Alto": 87.5, "Peso": 80.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-130CPE-23", "PVP": 6365.0, "Produccion": 103.0, "Ancho": 111.0, "Profundo": 70.0, "Alto": 87.5, "Peso": 80.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-130CPE-32", "PVP": 6500.0, "Produccion": 116.0, "Ancho": 111.0, "Profundo": 70.0, "Alto": 87.5, "Peso": 80.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "32"}, {"Nombre": "IM-130APE", "PVP": 6055.0, "Produccion": 125.0, "Ancho": 82.0, "Profundo": 66.5, "Alto": 105.4, "Peso": 68.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-130APE-23", "PVP": 6260.0, "Produccion": 100.0, "Ancho": 82.0, "Profundo": 66.5, "Alto": 105.4, "Peso": 68.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240PE", "PVP": 8665.0, "Produccion": 210.0, "Ancho": 80.5, "Profundo": 76.0, "Alto": 168.4, "Peso": 108.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-240PE-23", "PVP": 8870.0, "Produccion": 180.0, "Ancho": 80.5, "Profundo": 76.0, "Alto": 168.4, "Peso": 108.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240APE", "PVP": 7330.0, "Produccion": 210.0, "Ancho": 66.5, "Profundo": 82.0, "Alto": 105.4, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-240APE-23", "PVP": 7535.0, "Produccion": 190.0, "Ancho": 66.5, "Profundo": 82.0, "Alto": 105.4, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240APE-32", "PVP": 7675.0, "Produccion": 220.0, "Ancho": 66.5, "Profundo": 82.0, "Alto": 105.4, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "32"}, {"Nombre": "IM-240DPE", "PVP": 7035.0, "Produccion": 210.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 82.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-240XPE", "PVP": 7035.0, "Produccion": 210.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Apilable", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-240DPE-23", "PVP": 7240.0, "Produccion": 180.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 82.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240DPE-32", "PVP": 7380.0, "Produccion": 190.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 82.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "32"}, {"Nombre": "IM-240XPE-23", "PVP": 7240.0, "Produccion": 180.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Apilable", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240XPE-32", "PVP": 7380.0, "Produccion": 190.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Apilable", "Refrigeracion": "Refrigerado por aire", "TipoHielo": "Cubito", "TamanoCubito": "32"}, {"Nombre": "FM-480AWKE-R452-N-SB", "PVP": 11181.0, "Produccion": 380.0, "Ancho": 82.0, "Profundo": 67.0, "Alto": 96.0, "Peso": 96.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "FM-480AWKE-R452-SB", "PVP": 11181.0, "Produccion": 420.0, "Ancho": 82.0, "Profundo": 67.0, "Alto": 96.0, "Peso": 96.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Triturado", "TamanoCubito": "Pilé"}, {"Nombre": "FM-600AWKE-R452-N-SB", "PVP": 11982.0, "Produccion": 490.0, "Ancho": 82.0, "Profundo": 67.0, "Alto": 96.0, "Peso": 108.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Triturado", "TamanoCubito": "Pepita"}, {"Nombre": "FM-600AWKE-R452-SB", "PVP": 11982.0, "Produccion": 570.0, "Ancho": 82.0, "Profundo": 67.0, "Alto": 96.0, "Peso": 108.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Triturado", "TamanoCubito": "Pilé"}, {"Nombre": "IM-130WPE", "PVP": 6945.0, "Produccion": 116.0, "Ancho": 80.5, "Profundo": 58.0, "Alto": 137.5, "Peso": 71.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-130WPE-23", "PVP": 7150.0, "Produccion": 116.0, "Ancho": 80.5, "Profundo": 58.0, "Alto": 137.5, "Peso": 71.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-130WPE-E", "PVP": 7625.0, "Produccion": 116.0, "Ancho": 80.5, "Profundo": 58.0, "Alto": 137.5, "Peso": 72.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-130WPE-E-23", "PVP": 7830.0, "Produccion": 116.0, "Ancho": 80.5, "Profundo": 58.0, "Alto": 137.5, "Peso": 72.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-130WPE-F", "PVP": 7365.0, "Produccion": 116.0, "Ancho": 80.5, "Profundo": 58.0, "Alto": 137.5, "Peso": 72.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-130WPE-F-23", "PVP": 7570.0, "Produccion": 116.0, "Ancho": 80.5, "Profundo": 58.0, "Alto": 137.5, "Peso": 72.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-130WPE-U", "PVP": 7205.0, "Produccion": 116.0, "Ancho": 80.5, "Profundo": 58.0, "Alto": 137.5, "Peso": 71.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-130WPE-U-23", "PVP": 7410.0, "Produccion": 116.0, "Ancho": 80.5, "Profundo": 58.0, "Alto": 137.5, "Peso": 71.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240AWPE", "PVP": 7675.0, "Produccion": 210.0, "Ancho": 66.5, "Profundo": 82.0, "Alto": 105.4, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-240AWPE-23", "PVP": 7875.0, "Produccion": 210.0, "Ancho": 66.5, "Profundo": 82.0, "Alto": 105.4, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240AWPE-U", "PVP": 7935.0, "Produccion": 210.0, "Ancho": 66.5, "Profundo": 82.0, "Alto": 105.4, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-240AWPE-U-23", "PVP": 8140.0, "Produccion": 210.0, "Ancho": 66.5, "Profundo": 82.0, "Alto": 105.4, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240DWNE-HC-C", "PVP": 8490.0, "Produccion": 210.0, "Ancho": 116.0, "Profundo": 83.0, "Alto": 65.0, "Peso": 78.24, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "42"}, {"Nombre": "IM-240DWPE", "PVP": 7380.0, "Produccion": 210.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 82.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-240DWPE-23", "PVP": 7585.0, "Produccion": 210.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 82.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240DWPE-32", "PVP": 7720.0, "Produccion": 210.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 82.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "32"}, {"Nombre": "IM-240DWPE-U", "PVP": 7640.0, "Produccion": 210.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 82.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-240DWPE-U-23", "PVP": 7845.0, "Produccion": 210.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 82.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240DWPE-U-32", "PVP": 7985.0, "Produccion": 210.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 82.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Modular", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "32"}, {"Nombre": "IM-240WPE", "PVP": 9005.0, "Produccion": 210.0, "Ancho": 80.5, "Profundo": 76.0, "Alto": 168.4, "Peso": 108.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-240WPE-23", "PVP": 9210.0, "Produccion": 210.0, "Ancho": 80.5, "Profundo": 76.0, "Alto": 168.4, "Peso": 108.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240WPE-E", "PVP": 9690.0, "Produccion": 210.0, "Ancho": 80.5, "Profundo": 76.0, "Alto": 168.4, "Peso": 109.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-240WPE-E-23", "PVP": 9895.0, "Produccion": 210.0, "Ancho": 80.5, "Profundo": 76.0, "Alto": 168.4, "Peso": 109.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240WPE-F", "PVP": 9425.0, "Produccion": 210.0, "Ancho": 80.5, "Profundo": 76.0, "Alto": 168.4, "Peso": 109.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-240WPE-F-23", "PVP": 9630.0, "Produccion": 210.0, "Ancho": 80.5, "Profundo": 76.0, "Alto": 168.4, "Peso": 109.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240WPE-U", "PVP": 9270.0, "Produccion": 210.0, "Ancho": 80.5, "Profundo": 76.0, "Alto": 168.4, "Peso": 108.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-240WPE-U-23", "PVP": 9475.0, "Produccion": 210.0, "Ancho": 80.5, "Profundo": 76.0, "Alto": 168.4, "Peso": 108.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240XWNE-HC-C", "PVP": 8490.0, "Produccion": 210.0, "Ancho": 116.0, "Profundo": 83.0, "Alto": 65.0, "Peso": 78.24, "TipoProducto": "Maquina de hielo", "TipoChasis": "Apilable", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "42"}, {"Nombre": "IM-240XWPE", "PVP": 7380.0, "Produccion": 210.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Apilable", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-240XWPE-23", "PVP": 7585.0, "Produccion": 210.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Apilable", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240XWPE-32", "PVP": 7720.0, "Produccion": 210.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Apilable", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "32"}, {"Nombre": "IM-240XWPE-U", "PVP": 7640.0, "Produccion": 210.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Apilable", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-240XWPE-U-23", "PVP": 7845.0, "Produccion": 210.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Apilable", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "17"}, {"Nombre": "IM-240XWPE-U-32", "PVP": 7985.0, "Produccion": 210.0, "Ancho": 119.6, "Profundo": 82.5, "Alto": 64.0, "Peso": 78.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Apilable", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "32"}, {"Nombre": "IM-30CWPE", "PVP": 2955.0, "Produccion": 34.0, "Ancho": 50.5, "Profundo": 57.5, "Alto": 86.2, "Peso": 37.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-30CWPE-25", "PVP": 3120.0, "Produccion": 34.0, "Ancho": 50.5, "Profundo": 57.5, "Alto": 86.2, "Peso": 37.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "13"}, {"Nombre": "IM-30CWPE-U", "PVP": 3215.0, "Produccion": 34.0, "Ancho": 50.5, "Profundo": 57.5, "Alto": 86.2, "Peso": 37.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-30CWPE-U-25", "PVP": 3380.0, "Produccion": 34.0, "Ancho": 50.5, "Profundo": 57.5, "Alto": 86.2, "Peso": 37.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "13"}, {"Nombre": "IM-45WPE", "PVP": 3780.0, "Produccion": 47.0, "Ancho": 63.5, "Profundo": 52.0, "Alto": 100.7, "Peso": 45.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-45WPE-25", "PVP": 3950.0, "Produccion": 47.0, "Ancho": 63.5, "Profundo": 52.0, "Alto": 100.7, "Peso": 45.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "13"}, {"Nombre": "IM-45WPE-E", "PVP": 4465.0, "Produccion": 47.0, "Ancho": 63.5, "Profundo": 52.0, "Alto": 100.7, "Peso": 46.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-45WPE-E-25", "PVP": 4635.0, "Produccion": 47.0, "Ancho": 63.5, "Profundo": 52.0, "Alto": 100.7, "Peso": 46.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "13"}, {"Nombre": "IM-45WPE-F", "PVP": 4200.0, "Produccion": 47.0, "Ancho": 63.5, "Profundo": 52.0, "Alto": 100.7, "Peso": 46.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-45WPE-F-25", "PVP": 4370.0, "Produccion": 47.0, "Ancho": 63.5, "Profundo": 52.0, "Alto": 100.7, "Peso": 46.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "13"}, {"Nombre": "IM-45WPE-U", "PVP": 4045.0, "Produccion": 47.0, "Ancho": 63.5, "Profundo": 52.0, "Alto": 100.7, "Peso": 45.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-45WPE-U-25", "PVP": 4215.0, "Produccion": 47.0, "Ancho": 63.5, "Profundo": 52.0, "Alto": 100.7, "Peso": 45.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "13"}, {"Nombre": "IM-65WPE", "PVP": 4530.0, "Produccion": 58.0, "Ancho": 73.5, "Profundo": 57.0, "Alto": 101.2, "Peso": 48.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-65WPE-25", "PVP": 4695.0, "Produccion": 58.0, "Ancho": 73.5, "Profundo": 57.0, "Alto": 101.2, "Peso": 48.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "13"}, {"Nombre": "IM-65WPE-E", "PVP": 5210.0, "Produccion": 58.0, "Ancho": 73.5, "Profundo": 57.0, "Alto": 101.2, "Peso": 49.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-65WPE-E-25", "PVP": 5380.0, "Produccion": 58.0, "Ancho": 73.5, "Profundo": 57.0, "Alto": 101.2, "Peso": 49.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "13"}, {"Nombre": "IM-65WPE-F", "PVP": 4950.0, "Produccion": 58.0, "Ancho": 73.5, "Profundo": 57.0, "Alto": 101.2, "Peso": 49.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-65WPE-F-25", "PVP": 5115.0, "Produccion": 58.0, "Ancho": 73.5, "Profundo": 57.0, "Alto": 101.2, "Peso": 49.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "13"}, {"Nombre": "IM-65WPE-U", "PVP": 4790.0, "Produccion": 58.0, "Ancho": 73.5, "Profundo": 57.0, "Alto": 101.2, "Peso": 48.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "23"}, {"Nombre": "IM-65WPE-U-25", "PVP": 4960.0, "Produccion": 58.0, "Ancho": 73.5, "Profundo": 57.0, "Alto": 101.2, "Peso": 48.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Cubito", "TamanoCubito": "13"}, {"Nombre": "KM-140C-HC", "PVP": 5435.0, "Produccion": 138.0, "Ancho": 72.5, "Profundo": 82.5, "Alto": 135.7, "Peso": 69.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Crescent", "TamanoCubito": "10"}, {"Nombre": "KM-140C-HC-W", "PVP": 5985.0, "Produccion": 138.0, "Ancho": 72.5, "Profundo": 82.5, "Alto": 135.7, "Peso": 69.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Crescent", "TamanoCubito": "10"}, {"Nombre": "KM-40C-HC", "PVP": 2995.0, "Produccion": 43.0, "Ancho": 55.5, "Profundo": 71.5, "Alto": 99.6, "Peso": 39.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Crescent", "TamanoCubito": "10"}, {"Nombre": "KM-40C-HC-W", "PVP": 3545.0, "Produccion": 43.0, "Ancho": 55.5, "Profundo": 71.5, "Alto": 99.6, "Peso": 41.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Crescent", "TamanoCubito": "10"}, {"Nombre": "KM-60C-HC", "PVP": 3665.0, "Produccion": 60.0, "Ancho": 71.0, "Profundo": 71.5, "Alto": 99.6, "Peso": 45.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Crescent", "TamanoCubito": "10"}, {"Nombre": "KM-60C-HC-W", "PVP": 4220.0, "Produccion": 60.0, "Ancho": 71.0, "Profundo": 71.5, "Alto": 99.6, "Peso": 47.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Crescent", "TamanoCubito": "10"}, {"Nombre": "KM-80C-HC", "PVP": 4000.0, "Produccion": 75.0, "Ancho": 70.0, "Profundo": 80.5, "Alto": 99.6, "Peso": 50.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Crescent", "TamanoCubito": "10"}, {"Nombre": "KM-80C-HC-W", "PVP": 4550.0, "Produccion": 75.0, "Ancho": 70.0, "Profundo": 80.5, "Alto": 99.6, "Peso": 52.0, "TipoProducto": "Maquina de hielo", "TipoChasis": "Autocontenido", "Refrigeracion": "Agua", "TipoHielo": "Crescent", "TamanoCubito": "10"}];
+// Construye un mapa de tipos de hielo a tamaños disponibles directamente a partir de los datos
+function construirMapa() {
+  const mapa = {};
+  data.forEach(row => {
+    const tipo = row.TipoHielo;
+    const tam = row.TamanoCubito;
+    if (!tipo) return;
+    if (!mapa[tipo]) {
+      mapa[tipo] = new Set();
+    }
+    if (tam) {
+      mapa[tipo].add(tam.toString());
+    }
+  });
+  // Convierte los conjuntos en arrays ordenados
+  const resultado = {};
+  Object.keys(mapa).forEach(key => {
+    const arr = Array.from(mapa[key]);
+    arr.sort((a, b) => {
+      const aNum = parseFloat(a);
+      const bNum = parseFloat(b);
+      const aIsNum = !isNaN(aNum);
+      const bIsNum = !isNaN(bNum);
+      if (aIsNum && bIsNum) return aNum - bNum;
+      if (aIsNum) return -1;
+      if (bIsNum) return 1;
+      return a.localeCompare(b, 'es', {sensitivity: 'base'});
+    });
+    resultado[key] = arr;
+  });
+  return resultado;
+}
+
+const mapaTipos = construirMapa();
+
+// Inicializa las opciones de tipo y tamaño
+const tipoSelect = document.getElementById('tipoHielo');
+const tamanoSelect = document.getElementById('tamanoHielo');
+
+// Mapa de imágenes para modelos base. Las claves deben coincidir con la parte inicial del nombre del modelo (sin la variante)
+const imageMap = {
+  "IM-21CPE": "images/IM-21CPE.png",
+  "IM-30CPE": "images/IM-30CPE.png"
+};
+
+// Dada la referencia del modelo completo, determina la ruta de imagen más adecuada
+function getImageForModel(modelName) {
+  // Encuentra la clave más larga de imageMap que sea prefijo del nombre del modelo
+  let matchedKey = null;
+  for (const key in imageMap) {
+    if (modelName.startsWith(key)) {
+      if (!matchedKey || key.length > matchedKey.length) {
+        matchedKey = key;
+      }
+    }
+  }
+  return matchedKey ? imageMap[matchedKey] : null;
+}
+
+function poblarTipos() {
+  // limpia los tipos existentes
+  tipoSelect.innerHTML = '';
+  const tiposOrdenados = Object.keys(mapaTipos).sort((a, b) => a.localeCompare(b, 'es', {sensitivity: 'base'}));
+  tiposOrdenados.forEach(tipo => {
+    const op = document.createElement('option');
+    op.value = tipo;
+    op.textContent = tipo;
+    tipoSelect.appendChild(op);
+  });
+}
+
+function actualizarTamanos() {
+  const tipoSeleccionado = tipoSelect.value;
+  tamanoSelect.innerHTML = '';
+  if (!tipoSeleccionado || !mapaTipos[tipoSeleccionado]) {
+    return;
+  }
+  mapaTipos[tipoSeleccionado].forEach(tam => {
+    const op = document.createElement('option');
+    op.value = tam;
+    // Si el tamaño es numérico, mostrar " g" después del número
+    const num = parseFloat(tam);
+    const isNum = !isNaN(num);
+    op.textContent = isNum ? `${tam} g` : tam;
+    tamanoSelect.appendChild(op);
+  });
+}
+function normalizarTexto(text) {
+    return text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+function filtrar() {
+   const consumoInput = document.getElementById('consumo').value;
+   const consumo = parseFloat(consumoInput);
+   const precioInput = document.getElementById('precio').value;
+   const precio = parseFloat(precioInput);
+   if (isNaN(consumo) || consumo <= 0) {
+       alert('Por favor, introduce un consumo diario válido.');
+       return;
+   }
+   const tipoSeleccionado = tipoSelect.value;
+   const tamanoSeleccionado = tamanoSelect.value;
+   // filtrar por tipo y tamaño
+   const filtrados = data.filter(row => {
+       // Filtra por tipo de hielo
+       if (tipoSeleccionado && row.TipoHielo !== tipoSeleccionado) return false;
+       // Filtra por tamaño de cubito
+       if (tamanoSeleccionado && row.TamanoCubito && row.TamanoCubito.toString() !== tamanoSeleccionado) return false;
+       // Solo incluye filas que tengan producción válida
+       return true;
+   });
+   // Filtrado por rango de producción +/- 10 kg
+   const rangoInferior = consumo - 10;
+   const rangoSuperior = consumo + 10;
+   let candidatos = filtrados.filter(row => {
+       const prod = parseFloat(row.Produccion);
+       return prod >= rangoInferior && prod <= rangoSuperior;
+   });
+   // Si no hay candidatos en el rango pero existen modelos para ese tipo, mostrar el más pequeño o el más grande
+   if (candidatos.length === 0 && filtrados.length > 0) {
+       const ordenados = filtrados.slice().sort((a, b) => parseFloat(a.Produccion) - parseFloat(b.Produccion));
+       const menor = ordenados[0];
+       const mayor = ordenados[ordenados.length - 1];
+       if (consumo < parseFloat(menor.Produccion)) {
+           candidatos = [menor];
+       } else {
+           candidatos = [mayor];
+       }
+   }
+   // Construir HTML de resultado como tarjetas en lugar de tabla
+   let html = '';
+   if (candidatos.length === 0) {
+       html += '<p>No se han encontrado modelos para la selección realizada.</p>';
+   } else {
+       candidatos.forEach(row => {
+           // Determinar la imagen asociada al modelo
+           const imgPath = getImageForModel(row.Nombre);
+           // Calcular explicación del tipo (modular/autocontenido)
+           let tipoTexto = row.TipoChasis || '';
+           let explicacion = '';
+           const tipoNorm = normalizarTexto(tipoTexto);
+           if (tipoNorm === 'modular') {
+               explicacion = 'Necesita un depósito aparte para guardar el hielo.';
+           } else if (tipoNorm === 'autocontenido') {
+               explicacion = 'Incluye su propio depósito para guardar el hielo.';
+           }
+           // Construir texto de formato/tamaño: añadir " g" si es un número
+           let formatoTexto = '';
+           const tamano = row.TamanoCubito;
+           if (tamano) {
+               const numTam = parseFloat(tamano);
+               if (!isNaN(numTam)) {
+                   formatoTexto = `${tamano} g`;
+               } else {
+                   formatoTexto = tamano;
+               }
+           } else if (row.TipoHielo) {
+               formatoTexto = row.TipoHielo;
+           }
+           // Calcular ahorro si se ha introducido precio por kg
+           let ahorroTexto = '';
+           if (!isNaN(precio)) {
+               const gastoMensual = consumo * precio * 30;
+               const costeMaquina = row.PVP / 12;
+               const ahorro = gastoMensual - costeMaquina;
+               if (ahorro > 0) {
+                   ahorroTexto = `Ahorras ${ahorro.toFixed(2)} €/mes`;
+               } else if (ahorro < 0) {
+                   ahorroTexto = `Cuesta ${Math.abs(ahorro).toFixed(2)} €/mes más que comprar bolsas`;
+               } else {
+                   ahorroTexto = 'Sin ahorro respecto a comprar hielo';
+               }
+           }
+           // Construir la tarjeta
+           html += '<div class="card">';
+           if (imgPath) {
+               html += `<div class="card-image"><img src="${imgPath}" alt="Imagen de ${row.Nombre}"></div>`;
+           } else {
+               html += `<div class="card-image"><span style="font-size:0.8em;color:#777;">Imagen no disponible</span></div>`;
+           }
+           html += '<div class="card-info">';
+           html += `<h3>${row.Nombre}</h3>`;
+           html += `<p><strong>Producción diaria:</strong> ${row.Produccion} kg</p>`;
+           html += `<p><strong>Tipo:</strong> ${tipoTexto}${explicacion ? ' <small>(' + explicacion + ')</small>' : ''}</p>`;
+           html += `<p><strong>Formato de hielo:</strong> ${formatoTexto}</p>`;
+           html += `<p><strong>Refrigeración:</strong> ${row.Refrigeracion}</p>`;
+           html += `<p><strong>Dimensiones:</strong> ${row.Ancho} x ${row.Profundo} x ${row.Alto} cm</p>`;
+           html += `<p><strong>Peso neto:</strong> ${row.Peso} kg</p>`;
+           html += `<p><strong>PVP:</strong> ${row.PVP} €</p>`;
+           if (ahorroTexto) {
+               html += `<p><strong>Ahorro mensual:</strong> ${ahorroTexto}</p>`;
+           }
+           html += '</div>'; // cierra card-info
+           html += '</div>'; // cierra card
+       });
+   }
+   document.getElementById('resultado').innerHTML = html;
+}
+
+// Attach event
+window.addEventListener('DOMContentLoaded', () => {
+    // Inicializar listas desplegables
+    poblarTipos();
+    actualizarTamanos();
+    tipoSelect.addEventListener('change', () => {
+      actualizarTamanos();
+    });
+    document.getElementById('calcular').addEventListener('click', filtrar);
+});
+</script>
+</body>
+</html>
